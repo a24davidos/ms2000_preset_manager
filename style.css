@@ -1,0 +1,113 @@
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+* {
+    margin: 0;
+    padding: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+img {
+    max-width: 100%;
+    display: block;
+}
+h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+}
+
+
+html {
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.3125rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 2.625rem;
+    --font-size-4xl: 4rem;
+
+    --space-100: 0.25rem; 
+    --space-200: 0.5rem;  
+    --space-250: 0.625rem;
+    --space-300: 0.75rem;
+    --space-350: 0.875rem;
+    --space-400: 1rem;
+    --space-600: 1.5rem;
+    --space-800: 2rem;
+
+
+    --bg: oklch(0.05 0 0);
+    --border: oklch(1 0 0 / 0.2);
+    --text: oklch(0.95 0 0);
+    --accent: oklch(0.55 0.22 25);
+}
+
+
+/* ====================== HEADER ============================== */
+
+header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: medium;
+    border-bottom: 1px solid black;
+    padding-inline: var(--space-400);
+    padding-block: var(--space-600);
+}
+
+
+
+/* ====================== MAIN ============================== */
+
+.explorador {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+}
+
+.panel{
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 2;
+    background-color: red;
+    padding-inline: var(--space-400);
+    padding-block: var(--space-300);
+    row-gap: var(--space-300);
+}
+
+.panel--sintetizador{
+    border-right: 1px solid black;
+}
+
+.panel__header{
+    display: contents;
+}
+
+.panel__menu{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.panel__toolbar--banks > button{
+    padding-inline: var(--space-250);
+    padding-block: var(--space-100);
+}
+
+.panel__toolbar--io > button{
+    padding-inline: var(--space-300);
+    padding-block: var(--space-200);
+    flex-shrink: 2;
+}
+
+.panel__path{
+    font-size: x-small;
+    text-align: left;
+    width: 100%;
+    padding-inline: var(--space-200);
+    padding-block: var(--space-200);
+}
