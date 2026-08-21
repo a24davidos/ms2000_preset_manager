@@ -1,0 +1,14 @@
+# Editor
+.vscode/
+
+# Material de referencia (no es código del proyecto)
+*.pdf
+CLAUDE.md
+# OS
+.DS_Store
+Thumbs.db
+
+# Build / deps (por si en algún momento se añade tooling)
+node_modules/
+dist/
+.env
