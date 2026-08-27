@@ -14,12 +14,19 @@ img {
     max-width: 100%;
     display: block;
 }
+body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 h1, h2, h3, h4, h5, h6 {
     text-wrap: balance;
 }
 
 
 html {
+    height: 100%;
+
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-md: 1rem;
@@ -51,6 +58,7 @@ html {
 header {
     display: flex;
     flex-direction: row;
+    flex-shrink: 0;
     justify-content: space-between;
     font-size: medium;
     border-bottom: 1px solid black;
@@ -65,25 +73,32 @@ header {
 .explorador {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr 1fr;
+    grid-template-rows: auto auto 1fr;
+    flex: 1;
+    min-height: 0;
 }
 
 .panel{
     display: grid;
     grid-template-rows: subgrid;
-    grid-row: span 2;
+    grid-row: span 3;
     background-color: rgb(224, 224, 224);
     padding-inline: var(--space-400);
     padding-block: var(--space-300);
     row-gap: var(--space-300);
+    min-height: 0;
 }
 
 .panel--sintetizador{
     border-right: 1px solid black;
 }
 
-.panel__header{
-    display: contents;
+.panel__body{
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-300);
+    min-height: 0;
+    overflow: auto;
 }
 
 .panel__menu{
@@ -111,3 +126,4 @@ header {
     padding-inline: var(--space-200);
     padding-block: var(--space-200);
 }
+
