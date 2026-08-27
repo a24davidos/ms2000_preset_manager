@@ -65,14 +65,14 @@ header {
 .explorador {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto 1fr 1fr;
 }
 
 .panel{
     display: grid;
     grid-template-rows: subgrid;
     grid-row: span 2;
-    background-color: red;
+    background-color: rgb(224, 224, 224);
     padding-inline: var(--space-400);
     padding-block: var(--space-300);
     row-gap: var(--space-300);
@@ -105,7 +105,7 @@ header {
 }
 
 .panel__path{
-    font-size: x-small;
+    font-size: var(--font-size-xs);
     text-align: left;
     width: 100%;
     padding-inline: var(--space-200);
