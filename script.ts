@@ -1,4 +1,5 @@
 import {rename} from "./utils"
+import {parseMidi} from "midi-file"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
@@ -17,77 +18,46 @@ file_explorer?.addEventListener("change", async () => {
         rename(file_name, btn_explorer)
     }
 
-
     await getFileBuffer(file_explorer.files?.[0])
-
 
 })
 
 function open_explorer() {
     file_explorer?.click()
 }
+
+
 //Actualmente solo para .MID, posteriormente tenemos que permitir cargar tanto .MID como .syx ,y hacer el chequeo pertinente ⚠️
 async function getFileBuffer(file: File) {
     let buffer = await file.arrayBuffer()
-
-    let view = new DataView(buffer)
     let bytes = new Uint8Array(buffer)
 
-    if (!checkMThd(bytes)) {
-        console.error("El archivo no es un .mid válido")
-        return
-    }
-
-    let { valid, length } = parseMTrk(bytes, view)
-
-    if (!valid) {
-        console.error("MTrk no válido")
-        return
-    }
-    let sysexBytes = getCleanSysex(bytes, length)
+    let sysexBytes = getCleanSysex(bytes)
     if (!sysexBytes) {
-        console.error("Algo no ha salido bien") //REVISAR MAS ADELANTE UN MENSAJE MAS DESCRIPTIVO⚠️
         return
     }
 
     console.log("SysEx extraído:", sysexBytes.length, "bytes")
 }
 
-function checkMThd(bytes: Uint8Array): boolean {
-    let header = new TextDecoder("utf-8").decode(bytes.slice(0, 4))
-    return header === "MThd"
-}
-
-function parseMTrk(bytes: Uint8Array, view: DataView) {
-    let header = new TextDecoder("utf-8").decode(bytes.slice(14, 18))
-
-    if (header !== "MTrk") {
-        return { valid: false, length: 0 }
-    }
-
-    let length = view.getUint32(18)
-  
-
-    return { valid: true, length: length }
-
-}
-
-function getCleanSysex(bytes: Uint8Array, length: number): Uint8Array | null {
-    let trackBytes = bytes.slice(22, 22 + length)
-
-    let sysexStart = trackBytes.findIndex((byte) => byte === 0xF0)
-    if (sysexStart === -1) {
-        console.error("No se encontró el inicio del SysEx (0xF0)")
+//Utilizo la librería midi-file, para obtener el sysex limpio
+function getCleanSysex(bytes: Uint8Array): Uint8Array | null {
+    let parsed
+    try {
+        parsed = parseMidi(bytes)
+    } catch (error) {
+        console.error("El archivo no es un .mid válido:", error)
         return null
     }
 
-    let sysexEndRelative = trackBytes.subarray(sysexStart + 1).findIndex((byte) => byte === 0xF7)
-    if (sysexEndRelative === -1) {
-        console.error("No se encontró el fin del SysEx (0xF7)")
-        return null
+    for (let track of parsed.tracks) {
+        for (let event of track) {
+            if (event.type === "sysEx") {
+                return new Uint8Array(event.data)
+            }
+        }
     }
-    let sysexEnd = sysexStart + 1 + sysexEndRelative
 
-    // +1 en el final porque slice() no incluye el índice de fin, y queremos conservar el propio 0xF7
-    return trackBytes.slice(sysexStart, sysexEnd + 1)
+    console.error("El .mid es válido pero no contiene ningún evento SysEx") //Esto luego hay que moverlo y usarlo en una notificación o en algun toast ⚠️
+    return null
 }
