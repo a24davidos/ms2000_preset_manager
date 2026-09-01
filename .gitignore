@@ -3,6 +3,7 @@
 
 # Material de referencia (no es código del proyecto)
 *.pdf
+NOTES.md
 CLAUDE.md
 # OS
 .DS_Store

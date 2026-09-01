@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script type="module" src="/script.ts" defer></script>
     <title>MS2000</title>
 </head>
 <body>
@@ -17,7 +18,7 @@
             <span>Korg ms2000</span>
         </div>
     </header>
-    <main class="explorador">
+    <main class="explorer">
         <section class="panel panel--sintetizador">
             <div class="panel__header">
                 <h4>Sintetizador</h4>
@@ -192,12 +193,12 @@
                 </div>
             </div>
         </section>
-        <section class="panel panel--explorador">
+        <section class="panel panel--explorer">
             <div class="panel__header">
                 <h4>Explorador</h4>
             </div>
             <div class="panel__menu">
-                <button class="panel__path">/Users/usuario/Documentos/MS2000 Backups/factory_sysex.syx</button>
+                <button class="panel__path" id="explorer__file-button">/Users/usuario/Documentos/MS2000 Backups/factory_sysex.syx</button>
             </div>
             <div class="panel__body">
               <div class="panel__presets" data-bank="A">
@@ -353,6 +354,7 @@
                 </div>
             </div>
         </section>
+        <input type="file" accept=".MID" hidden id="explorer__file-input">
     </main>
 </body>
 </html>
