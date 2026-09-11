@@ -2,6 +2,7 @@ import {rename} from "./utils"
 import {parseMidi} from "midi-file"
 import {decodeSysex} from "./ms2000-decoder"
 import {splitIntoPatches, getPatchName} from "./ms2000-patch"
+import {getPatches, setPatches} from "./patch-store"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
@@ -41,9 +42,10 @@ async function getFileBuffer(file: File) {
     let decodedData = decodeSysex(sysex)
     if (!decodedData) return //Controlar mas adelante ⚠️
 
-    let patches = splitIntoPatches(decodedData)
+    // Guardo los patches que hemos extraído
+    setPatches(splitIntoPatches(decodedData))
 
-    for (let patch of patches) {
+    for (let patch of getPatches()) {
         console.log(getPatchName(patch))
     }
 }
