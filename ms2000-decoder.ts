@@ -1,3 +1,7 @@
+const KORG_MANUFACTURER_ID = 0x42
+const MS2000_DEVICE_ID = 0x58
+
+
 // Deshace el encoding 7-to-8 bit de Korg: cada grupo de 8 bytes (1 msb_byte + 7 data_byte)
 function decode_korg_7bit(encoded_data: Uint8Array): Uint8Array {
     let decoded: number[] = []
@@ -21,3 +25,16 @@ function decode_korg_7bit(encoded_data: Uint8Array): Uint8Array {
 
     return new Uint8Array(decoded)
 }
+
+function decodeSysex(rawSysex: Uint8Array): Uint8Array | null {
+
+    if (rawSysex[0] === KORG_MANUFACTURER_ID && rawSysex[2] === MS2000_DEVICE_ID){
+        let encoded_data = rawSysex.slice(4) // header MS2000: manufacturer+channel+device+function
+        return decode_korg_7bit(encoded_data)
+    }
+
+    console.error("El SysEx no pertenece a un Korg MS2000")
+    return null
+}
+
+export { decodeSysex }
