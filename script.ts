@@ -1,6 +1,7 @@
 import {rename} from "./utils"
 import {parseMidi} from "midi-file"
 import {decodeSysex} from "./ms2000-decoder"
+import {splitIntoPatches, getPatchName} from "./ms2000-patch"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
@@ -15,7 +16,7 @@ file_explorer?.addEventListener("change", async () => {
 
 
     let file_name = file_explorer.files?.[0].name
-    
+
     //Esto lo tengo que mover, no tiene sentido que este aquí sino carga no debería de hacer rename del button ⚠️
     if (file_name && btn_explorer) {
         rename(file_name, btn_explorer)
@@ -29,7 +30,6 @@ function open_explorer() {
     file_explorer?.click()
 }
 
-
 //Actualmente solo para .MID, posteriormente tenemos que permitir cargar tanto .MID como .syx ,y hacer el chequeo pertinente ⚠️
 async function getFileBuffer(file: File) {
     let buffer = await file.arrayBuffer()
@@ -41,9 +41,15 @@ async function getFileBuffer(file: File) {
     let decodedData = decodeSysex(sysex)
     if (!decodedData) return //Controlar mas adelante ⚠️
 
-    console.log(decodedData);
-    
+    let patches = splitIntoPatches(decodedData)
+
+    for (let patch of patches) {
+        console.log(getPatchName(patch))
+    }
 }
+
+
+
 
 //Utilizo la librería midi-file, para obtener el sysex limpio
 function getCleanSysex(bytes: Uint8Array): Uint8Array | null {
