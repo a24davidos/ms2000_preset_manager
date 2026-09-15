@@ -8,6 +8,8 @@ import {getPatches, setPatches} from "./patch-store"
 let btn_explorer = document.getElementById("explorer__file-button")
 let file_explorer = document.getElementById("explorer__file-input") as HTMLInputElement
 
+let explorer_divs = document.getElementsByClassName('panel__explorer')
+
 btn_explorer?.addEventListener("click", () => {
     open_explorer()
 })
@@ -45,9 +47,22 @@ async function getFileBuffer(file: File) {
     // Guardo los patches que hemos extraído
     setPatches(splitIntoPatches(decodedData))
 
-    for (let patch of getPatches()) {
-        console.log(getPatchName(patch))
-    }
+    updateExplorerNames()
+}
+
+// Escribe el nombre de cada patch leído en su correspondiente span
+function updateExplorerNames() {
+    let patches = getPatches()
+
+    // Aplano los <span class="preset__name"> de los 8 bancos en un único array
+    let allNameSpans = Array.from(explorer_divs).flatMap(div => Array.from(div.getElementsByClassName('preset__name')))
+
+    patches.forEach((patch, i) => {
+        let nameSpan = allNameSpans[i]
+        if (!nameSpan) return
+
+        nameSpan.textContent = getPatchName(patch)
+    })
 }
 
 
