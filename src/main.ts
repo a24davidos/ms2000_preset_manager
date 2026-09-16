@@ -1,8 +1,8 @@
 import {rename} from "./utils"
 import {parseMidi} from "midi-file"
-import {decodeSysex, splitIntoPatches, getPatchName} from "./ms2000"
-import {createPatch} from "./patch-store"
-import {explorerStore} from "./stores"
+import {decodeSysex, splitIntoPatches, getPatchName} from "./midi/ms2000"
+import {createPatch} from "./state/patch-store"
+import {explorerStore} from "./state/stores"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
