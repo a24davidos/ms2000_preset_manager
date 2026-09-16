@@ -1,26 +1,34 @@
 type Patch = { id: string, data: Uint8Array }
 
-let patches: Patch[] = []
-
-
 let nextId = 0
 
-function getPatches(): Patch[] {
-    return patches
+function createPatch(data: Uint8Array): Patch {
+    return { id: `p${nextId++}`, data }
 }
 
+function createPatchStore() {
+    let patches: Patch[] = []
 
-function setPatches(newPatches: Uint8Array[]) {
-    patches = newPatches.map(data => ({
-        id: `p${nextId++}`,
-        data
-    }))
+    function getAll(): Patch[] {
+        return [...patches]
+    }
+
+    function setAll(newPatches: Patch[]) {
+        patches = [...newPatches]
+    }
+
+    function getById(id: string): Patch | undefined {
+        return patches.find(patch => patch.id === id)
+    }
+
+    function add(patch: Patch) {
+        patches.push(patch)
+    }
+
+    return { getAll, setAll, getById, add }
 }
 
-// Resuelve el data-id de un <li> a su patch
-function getPatchById(id: string): Patch | undefined {
-    return patches.find(patch => patch.id === id)
-}
+type PatchStore = ReturnType<typeof createPatchStore>
 
-export type { Patch }
-export { getPatches, setPatches, getPatchById }
+export type { Patch, PatchStore }
+export { createPatch, createPatchStore }

@@ -1,7 +1,8 @@
 import {rename} from "./utils"
 import {parseMidi} from "midi-file"
 import {decodeSysex, splitIntoPatches, getPatchName} from "./ms2000"
-import {getPatches, setPatches, getPatchById} from "./patch-store"
+import {createPatch} from "./patch-store"
+import {explorerStore} from "./stores"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
@@ -44,14 +45,14 @@ async function getFileBuffer(file: File) {
     if (!decodedData) return //Controlar mas adelante ⚠️
 
     // Guardo los patches que hemos extraído
-    setPatches(splitIntoPatches(decodedData))
+    explorerStore.setAll(splitIntoPatches(decodedData).map(createPatch))
 
     renderExplorer()
 }
 
 // Pinta la lista entera que se muestra en el explorador
 function renderExplorer() {
-    let patches = getPatches()
+    let patches = explorerStore.getAll()
 
     // Aplano los <li class="preset"> de los 8 bancos en un único array
     let allItems = Array.from(explorer_divs).flatMap(div => Array.from(div.getElementsByClassName('preset')))
@@ -73,7 +74,7 @@ for (let div of explorer_divs) {
         let item = (event.target as HTMLElement).closest('.preset') as HTMLElement | null
         if (!item?.dataset.id) return
 
-        let patch = getPatchById(item.dataset.id)
+        let patch = explorerStore.getById(item.dataset.id)
         if (!patch) return
 
         console.log(item.dataset.id, getPatchName(patch.data))
