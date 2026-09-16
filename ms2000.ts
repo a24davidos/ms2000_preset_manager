@@ -1,6 +1,10 @@
 const KORG_MANUFACTURER_ID = 0x42
 const MS2000_DEVICE_ID = 0x58
 
+const PATCH_SIZE = 254 // bytes por patch
+const PATCH_COUNT = 128
+const NAME_LENGTH = 12 //primeros 12 bytes de cada patch son el nombre en ASCII
+
 
 // Deshace el encoding 7-to-8 bit de Korg: cada grupo de 8 bytes (1 msb_byte + 7 data_byte)
 function decode_korg_7bit(encoded_data: Uint8Array): Uint8Array {
@@ -37,4 +41,19 @@ function decodeSysex(rawSysex: Uint8Array): Uint8Array | null {
     return null
 }
 
-export { decodeSysex }
+function splitIntoPatches(data: Uint8Array, patchSize = PATCH_SIZE, patchCount = PATCH_COUNT): Uint8Array[] {
+    const patches: Uint8Array[] = []
+
+    for (let i = 0; i < data.length; i += patchSize) {
+        patches.push(data.subarray(i, i + patchSize))
+    }
+
+    return patches.slice(0, patchCount)
+}
+
+function getPatchName(patch: Uint8Array): string {
+    let nameBytes = patch.slice(0, NAME_LENGTH)
+    return String.fromCharCode(...nameBytes).trim()
+}
+
+export { decodeSysex, splitIntoPatches, getPatchName }

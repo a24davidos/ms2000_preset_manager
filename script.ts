@@ -1,8 +1,7 @@
 import {rename} from "./utils"
 import {parseMidi} from "midi-file"
-import {decodeSysex} from "./ms2000-decoder"
-import {splitIntoPatches, getPatchName} from "./ms2000-patch"
-import {getPatches, setPatches} from "./patch-store"
+import {decodeSysex, splitIntoPatches, getPatchName} from "./ms2000"
+import {getPatches, setPatches, getPatchById} from "./patch-store"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
@@ -47,26 +46,39 @@ async function getFileBuffer(file: File) {
     // Guardo los patches que hemos extraído
     setPatches(splitIntoPatches(decodedData))
 
-    updateExplorerNames()
+    renderExplorer()
 }
 
-// Escribe el nombre de cada patch leído en su correspondiente span
-function updateExplorerNames() {
+// Pinta la lista entera que se muestra en el explorador
+function renderExplorer() {
     let patches = getPatches()
 
-    // Aplano los <span class="preset__name"> de los 8 bancos en un único array
-    let allNameSpans = Array.from(explorer_divs).flatMap(div => Array.from(div.getElementsByClassName('preset__name')))
+    // Aplano los <li class="preset"> de los 8 bancos en un único array
+    let allItems = Array.from(explorer_divs).flatMap(div => Array.from(div.getElementsByClassName('preset')))
 
     patches.forEach((patch, i) => {
-        let nameSpan = allNameSpans[i]
-        if (!nameSpan) return
+        let item = allItems[i] as HTMLElement | undefined
+        if (!item) return
 
-        nameSpan.textContent = getPatchName(patch)
+        item.dataset.id = patch.id
+
+        let nameSpan = item.getElementsByClassName('preset__name')[0]
+        if (nameSpan) nameSpan.textContent = getPatchName(patch.data)
     })
 }
 
+// Añadimos a los divs, un event listener. Pongo 8 en vez de 128, y asi cuando cree un <li> no tengo que añadirle un eventlistener de cada vez
+for (let div of explorer_divs) {
+    div.addEventListener("click", (event) => {
+        let item = (event.target as HTMLElement).closest('.preset') as HTMLElement | null
+        if (!item?.dataset.id) return
 
+        let patch = getPatchById(item.dataset.id)
+        if (!patch) return
 
+        console.log(item.dataset.id, getPatchName(patch.data))
+    })
+}
 
 //Utilizo la librería midi-file, para obtener el sysex limpio
 function getCleanSysex(bytes: Uint8Array): Uint8Array | null {
