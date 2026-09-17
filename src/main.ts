@@ -1,4 +1,3 @@
-import {rename} from "./utils"
 import {parseMidi} from "midi-file"
 import {decodeSysex, splitIntoPatches, getPatchName} from "./midi/ms2000"
 import {createPatch} from "./state/patch-store"
@@ -22,7 +21,7 @@ file_explorer?.addEventListener("change", async () => {
 
     //Esto lo tengo que mover, no tiene sentido que este aquí sino carga no debería de hacer rename del button ⚠️
     if (file_name && btn_explorer) {
-        rename(file_name, btn_explorer)
+        btn_explorer.textContent = file_name
     }
 
     await getFileBuffer(file_explorer.files?.[0])
@@ -57,14 +56,22 @@ function renderExplorer() {
     // Aplano los <li class="preset"> de los 8 bancos en un único array
     let allItems = Array.from(explorer_divs).flatMap(div => Array.from(div.getElementsByClassName('preset')))
 
-    patches.forEach((patch, i) => {
-        let item = allItems[i] as HTMLElement | undefined
-        if (!item) return
 
-        item.dataset.id = patch.id
+    allItems.forEach((element, i) => {
+        let item = element as HTMLElement
+        let patch = patches[i]
 
         let nameSpan = item.getElementsByClassName('preset__name')[0]
-        if (nameSpan) nameSpan.textContent = getPatchName(patch.data)
+
+        item.classList.toggle('preset--empty', !patch)
+
+        if (patch) {
+            item.dataset.id = patch.id
+            if (nameSpan) nameSpan.textContent = getPatchName(patch.data)
+        } else {
+            delete item.dataset.id
+            if (nameSpan) nameSpan.textContent = "EMPTY_SLOT" //Ver como se trata a futuro los huecos empty y tal, de momento nose como hacerlo⚠️
+        }
     })
 }
 
