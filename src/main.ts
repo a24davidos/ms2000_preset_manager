@@ -1,10 +1,12 @@
 import {parseMidi} from "midi-file"
 import {decodeSysex, splitIntoPatches, getPatchName} from "./midi/ms2000"
 import {createPatch} from "./state/patch-store"
-import {explorerStore} from "./state/stores"
+import {explorerStore, synthStore} from "./state/stores"
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
+let btn_explorer_copyAll = document.getElementById("explorer__copy-to-synth")
+
 let file_explorer = document.getElementById("explorer__file-input") as HTMLInputElement
 
 let explorer_divs = document.getElementsByClassName('panel__explorer')
@@ -12,6 +14,9 @@ let explorer_divs = document.getElementsByClassName('panel__explorer')
 btn_explorer?.addEventListener("click", () => {
     open_explorer()
 })
+
+btn_explorer_copyAll?.addEventListener("click", () => copyExplorerToSynth())
+
 
 file_explorer?.addEventListener("change", async () => {
     if (!file_explorer.files?.[0]) return
@@ -74,6 +79,14 @@ function renderExplorer() {
         }
     })
 }
+
+function copyExplorerToSynth() { //⚠️ Actualmente esto copia TODO el explorerStore, en el futuro mejorar para poder copiar de uno en uno
+    let copies = explorerStore.getAll().map(patch => createPatch(patch.data))
+    synthStore.setAll(copies)
+
+    console.log(synthStore.getAll());
+}
+
 
 // Añadimos a los divs, un event listener. Pongo 8 en vez de 128, y asi cuando cree un <li> no tengo que añadirle un eventlistener de cada vez
 for (let div of explorer_divs) {
