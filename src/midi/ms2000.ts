@@ -3,6 +3,8 @@ const MS2000_DEVICE_ID = 0x58
 
 const PATCH_SIZE = 254 // bytes por patch
 const PATCH_COUNT = 128
+const BANK_COUNT = 8
+const PATCHES_PER_BANK = PATCH_COUNT / BANK_COUNT
 const NAME_LENGTH = 12 //primeros 12 bytes de cada patch son el nombre en ASCII
 
 
@@ -60,4 +62,4 @@ function getPatchName(patch: Uint8Array): string {
     return String.fromCharCode(...nameBytes).trim()
 }
 
-export { decodeSysex, splitIntoPatches, getPatchName }
+export { decodeSysex, splitIntoPatches, getPatchName, PATCHES_PER_BANK }

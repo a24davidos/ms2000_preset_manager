@@ -1,7 +1,13 @@
 import {parseMidi} from "midi-file"
-import {decodeSysex, splitIntoPatches, getPatchName} from "./midi/ms2000"
+import {decodeSysex, splitIntoPatches, getPatchName, PATCHES_PER_BANK} from "./midi/ms2000"
 import {createPatch, PatchStore} from "./state/patch-store"
 import {explorerStore, synthStore} from "./state/stores"
+
+
+let synth_body = document.querySelector(".panel--sintetizador .panel__body")
+let explorer_body = document.querySelector(".panel--explorer .panel__body")
+
+
 
 // ========== EXPLORADOR ==========
 let btn_explorer = document.getElementById("explorer__file-button")
@@ -126,3 +132,62 @@ function getCleanSysex(bytes: Uint8Array): Uint8Array | null {
     console.error("El .mid es válido pero no contiene ningún evento SysEx") //Esto luego hay que moverlo y usarlo en una notificación o en algun toast ⚠️
     return null
 }
+
+
+// Construye los 8 bancos de ambos paneles
+function buildPanels(container: Element, bankClass: string){
+
+    let banks = ["A", "B", "C", "D", "E", "F", "G", "H"]
+
+    banks.forEach((x, bankIndex) => {
+
+        //Creo el div padre
+        const divBank = document.createElement("div")
+        divBank.classList.add(bankClass)
+        divBank.dataset.bank = x
+
+        //Creo el h5, con el rango de slots que ocupa este banco (1-16, 17-32) ⚠️ Pensar si de verdad me es útil o solo es rizar el rizo
+        const firstSlot = bankIndex * PATCHES_PER_BANK + 1
+        const h5 = document.createElement("h5")
+        h5.textContent = `Banco ${x}: ${firstSlot} - ${firstSlot + PATCHES_PER_BANK - 1}`
+
+        //Creo el ul
+        const ul = document.createElement("ul")
+
+        for (let i = 1; i <= PATCHES_PER_BANK; i++){
+
+            //Creo el li
+            const li = document.createElement("li")
+            li.classList.add("preset", "preset--empty")
+
+            //Creo el span del id
+            const spanId = document.createElement("span")
+            spanId.classList.add("preset__id")
+            spanId.textContent = `${x}${String(i).padStart(2, "0")}`
+
+            //Creo el span del nombre vacío
+            const spanName = document.createElement("span")
+            spanName.classList.add("preset__name")
+            spanName.textContent = "vacío"
+
+            li.appendChild(spanId)
+            li.appendChild(spanName)
+
+            ul.appendChild(li)
+        }
+
+        divBank.appendChild(h5)
+        divBank.appendChild(ul)
+
+        container.appendChild(divBank)
+    })
+}
+
+
+function init() {
+    if (!synth_body || !explorer_body) return
+    buildPanels(synth_body, "panel__synth")
+    buildPanels(explorer_body, "panel__explorer")
+}
+
+init()

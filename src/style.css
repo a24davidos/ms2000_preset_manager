@@ -127,3 +127,8 @@ header {
     padding-block: var(--space-200);
 }
 
+
+.preset {
+    display: flex;
+    gap: var(--space-200)
+}
