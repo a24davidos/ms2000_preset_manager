@@ -5,6 +5,7 @@ const PATCH_SIZE = 254 // bytes por patch
 const PATCH_COUNT = 128
 const BANK_COUNT = 8
 const PATCHES_PER_BANK = PATCH_COUNT / BANK_COUNT
+const BANK_NAMES = ["A", "B", "C", "D", "E", "F", "G", "H"]
 const NAME_LENGTH = 12 //primeros 12 bytes de cada patch son el nombre en ASCII
 
 
@@ -62,4 +63,4 @@ function getPatchName(patch: Uint8Array): string {
     return String.fromCharCode(...nameBytes).trim()
 }
 
-export { decodeSysex, splitIntoPatches, getPatchName, PATCHES_PER_BANK }
+export { decodeSysex, splitIntoPatches, getPatchName, PATCHES_PER_BANK, BANK_NAMES }

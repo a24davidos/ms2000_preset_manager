@@ -1,7 +1,10 @@
 import {parseMidi} from "midi-file"
-import {decodeSysex, splitIntoPatches, getPatchName, PATCHES_PER_BANK} from "./midi/ms2000"
-import {createPatch, PatchStore} from "./state/patch-store"
+import {decodeSysex, splitIntoPatches, getPatchName, PATCHES_PER_BANK, BANK_NAMES} from "./midi/ms2000"
+import {createPatch, Patch, PatchStore} from "./state/patch-store"
 import {explorerStore, synthStore} from "./state/stores"
+
+
+const EMPTY_SLOT_NAME = "vacío" //Ver como se trata a futuro los huecos empty y tal, de momento nose como hacerlo⚠️
 
 
 let synth_body = document.querySelector(".panel--sintetizador .panel__body")
@@ -64,27 +67,48 @@ async function getFileBuffer(file: File) {
 
 }
 
-// Pinta la lista entera que se muestra en el explorador
+// Crea la estructura de li
+function createSlot(slotId: string, patch: Patch | undefined): HTMLElement {
+
+    //Creo el li
+    const li = document.createElement("li")
+    li.classList.add("preset")
+    li.classList.toggle("preset--empty", !patch)
+    if (patch) li.dataset.id = patch.id
+
+    //Creo el span del id
+    const spanId = document.createElement("span")
+    spanId.classList.add("preset__id")
+    spanId.textContent = slotId
+
+    //Creo el span del nombre
+    const spanName = document.createElement("span")
+    spanName.classList.add("preset__name")
+    spanName.textContent = patch ? getPatchName(patch.data) : EMPTY_SLOT_NAME
+
+    li.appendChild(spanId)
+    li.appendChild(spanName)
+
+    return li
+}
+
+// Pinta la lista entera de un panel y regenera los 128 slots desde el store
 function renderPanel(divs: HTMLCollection, store: PatchStore){
     let patches = store.getAll()
 
-    let allItems = Array.from(divs).flatMap(div => Array.from(div.getElementsByClassName('preset')))
+    Array.from(divs).forEach((div, bankIndex) => {
+        const ul = div.querySelector("ul")
+        if (!ul) return
 
-    allItems.forEach((element, i) => {
-        let item = element as HTMLElement
-        let patch = patches[i]
+        const bankName = BANK_NAMES[bankIndex]
+        const slots: HTMLElement[] = []
 
-        let nameSpan = item.getElementsByClassName('preset__name')[0]
-
-        item.classList.toggle('preset--empty', !patch)
-
-        if (patch) {
-            item.dataset.id = patch.id
-            if (nameSpan) nameSpan.textContent = getPatchName(patch.data)
-        } else {
-            delete item.dataset.id
-            if (nameSpan) nameSpan.textContent = "EMPTY_SLOT" //Ver como se trata a futuro los huecos empty y tal, de momento nose como hacerlo⚠️
+        for (let i = 1; i <= PATCHES_PER_BANK; i++) {
+            const slotId = `${bankName}${String(i).padStart(2, "0")}`
+            slots.push(createSlot(slotId, patches[bankIndex * PATCHES_PER_BANK + i - 1]))
         }
+
+        ul.replaceChildren(...slots)
     })
 }
 
@@ -137,9 +161,7 @@ function getCleanSysex(bytes: Uint8Array): Uint8Array | null {
 // Construye los 8 bancos de ambos paneles
 function buildPanels(container: Element, bankClass: string){
 
-    let banks = ["A", "B", "C", "D", "E", "F", "G", "H"]
-
-    banks.forEach((x, bankIndex) => {
+    BANK_NAMES.forEach((x, bankIndex) => {
 
         //Creo el div padre
         const divBank = document.createElement("div")
@@ -151,30 +173,8 @@ function buildPanels(container: Element, bankClass: string){
         const h5 = document.createElement("h5")
         h5.textContent = `Banco ${x}: ${firstSlot} - ${firstSlot + PATCHES_PER_BANK - 1}`
 
-        //Creo el ul
+        //Creo el ul vacío y  de llenarlo se encarga renderPanel
         const ul = document.createElement("ul")
-
-        for (let i = 1; i <= PATCHES_PER_BANK; i++){
-
-            //Creo el li
-            const li = document.createElement("li")
-            li.classList.add("preset", "preset--empty")
-
-            //Creo el span del id
-            const spanId = document.createElement("span")
-            spanId.classList.add("preset__id")
-            spanId.textContent = `${x}${String(i).padStart(2, "0")}`
-
-            //Creo el span del nombre vacío
-            const spanName = document.createElement("span")
-            spanName.classList.add("preset__name")
-            spanName.textContent = "vacío"
-
-            li.appendChild(spanId)
-            li.appendChild(spanName)
-
-            ul.appendChild(li)
-        }
 
         divBank.appendChild(h5)
         divBank.appendChild(ul)
@@ -188,6 +188,9 @@ function init() {
     if (!synth_body || !explorer_body) return
     buildPanels(synth_body, "panel__synth")
     buildPanels(explorer_body, "panel__explorer")
+
+    renderPanel(synth_divs, synthStore)
+    renderPanel(explorer_divs, explorerStore)
 }
 
 init()
