@@ -1,6 +1,6 @@
 import {parseMidi} from "midi-file"
 import {decodeSysex, splitIntoPatches, getPatchName} from "./midi/ms2000"
-import {createPatch} from "./state/patch-store"
+import {createPatch, PatchStore} from "./state/patch-store"
 import {explorerStore, synthStore} from "./state/stores"
 
 // ========== EXPLORADOR ==========
@@ -10,6 +10,7 @@ let btn_explorer_copyAll = document.getElementById("explorer__copy-to-synth")
 let file_explorer = document.getElementById("explorer__file-input") as HTMLInputElement
 
 let explorer_divs = document.getElementsByClassName('panel__explorer')
+let synth_divs = document.getElementsByClassName('panel__synth')
 
 btn_explorer?.addEventListener("click", () => {
     open_explorer()
@@ -51,16 +52,17 @@ async function getFileBuffer(file: File) {
     // Guardo los patches que hemos extraído
     explorerStore.setAll(splitIntoPatches(decodedData).map(createPatch))
 
-    renderExplorer()
+    console.log(explorerStore);
+    
+    renderPanel(explorer_divs, explorerStore)
+
 }
 
 // Pinta la lista entera que se muestra en el explorador
-function renderExplorer() {
-    let patches = explorerStore.getAll()
+function renderPanel(divs: HTMLCollection, store: PatchStore){
+    let patches = store.getAll()
 
-    // Aplano los <li class="preset"> de los 8 bancos en un único array
-    let allItems = Array.from(explorer_divs).flatMap(div => Array.from(div.getElementsByClassName('preset')))
-
+    let allItems = Array.from(divs).flatMap(div => Array.from(div.getElementsByClassName('preset')))
 
     allItems.forEach((element, i) => {
         let item = element as HTMLElement
@@ -84,7 +86,7 @@ function copyExplorerToSynth() { //⚠️ Actualmente esto copia TODO el explore
     let copies = explorerStore.getAll().map(patch => createPatch(patch.data))
     synthStore.setAll(copies)
 
-    console.log(synthStore.getAll());
+    renderPanel(synth_divs, synthStore)
 }
 
 
